@@ -1,0 +1,48 @@
+---
+title: "usgs_data"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(dataRetrieval)
+library(lubridate)
+```
+
+```{r}
+# set parameters for query
+siteNumber <- "11118500"
+parameterCd <- "00060" # Discharge
+startDate <- "2023-08-19"
+endDate <- "2023-08-22"
+
+# query the apis
+discharge <- readNWISuv(siteNumber, parameterCd, startDate, endDate) %>% rename(discharge = X_00060_00000)
+```
+
+```{r}
+# set parameters for query
+siteNumber <- "11118500"
+parameterCd <- "00060" # Discharge
+startDate <- "2023-01-09"
+endDate <- "2023-01-09"
+
+# query the apis
+discharge_jan <- readNWISuv(siteNumber, parameterCd, startDate, endDate) %>% rename(discharge = X_00060_00000)
+
+discharge_compare <- full_join(discharge, discharge_jan)
+
+discharge_compare <- discharge_compare %>% mutate(date = date(dateTime)) %>% filter(date %in% c("2023-08-21", "2023-01-09"))
+```
+
+```{r}
+ggplot(discharge_compare, aes(x = date, y = discharge)) + geom_col() 
+```
+
+
+```{r}
+ggplot(discharge, aes(x = dateTime, y = discharge)) + geom_point()
+```
+
